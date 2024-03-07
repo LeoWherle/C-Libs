@@ -1,0 +1,3 @@
+CompileFlags:
+  Add: [-Wall, -Wextra, -I./libs/clist/include, -I./libs/cbuffer/include, -I./libs/mystr/include, -I./libs/serrorh/include]
+  Compiler: gcc
