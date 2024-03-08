@@ -34,7 +34,7 @@ vec_error_t vec_reserve(vector_t *vec, size_t additional)
         return (VEC_NULLPTR);
     }
     if (vec->nmemb + additional > vec->capacity) {
-        vec->capacity *= VEC_GROWTH_FACTOR + (additional / vec->capacity);
+        vec->capacity *= VEC_GROWTH_FACTOR + (additional / vec->capacity) - 1;
         items_new = realloc(vec->items, vec->capacity * vec->item_size);
         if (items_new == NULL) {
             return (VEC_ALLOC);

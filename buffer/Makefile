@@ -26,7 +26,7 @@ CC = gcc
 
 SRC 	=	$(shell find src/ -name "*.c" -type f)
 
-CRIT_LIST	=	\
+CRIT_LIST	=	$(shell find ../tests/lib/$(NAME)/ -name "*.c" -type f)
 
 SRC_CRIT = $(SRC)
 TEST_CRIT = $(CRIT_LIST)
