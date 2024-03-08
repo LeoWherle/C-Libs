@@ -6,4 +6,4 @@
 ##
 
 NAME=buffer
-LIBNAME=libnbuffer.a
+LIBNAME=libbuffer.a

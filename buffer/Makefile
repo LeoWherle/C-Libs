@@ -24,10 +24,7 @@ RESET		=	\033[0m
 BUILD_DIR = ../build/
 CC = gcc
 
-SRC 	=	src/cbuffer_init.c \
-			src/cbuffer_edit.c \
-			src/cbuffer_get.c \
-
+SRC 	=	$(shell find src/ -name "*.c" -type f)
 
 CRIT_LIST	=	\
 

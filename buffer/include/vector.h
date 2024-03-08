@@ -11,36 +11,45 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-typedef void (*dtor_t)(void *);
-typedef void (*cpctor_t)(void);
+#define VEC_INIT_CAPACITY 8
+#define VEC_GROWTH_FACTOR 2
 
-typedef struct error_t {
-    enum {
-        VEC_OK = 0,
-        VEC_ALLOC,
-        VEC_INDEX,
-        VEC_EMPTY,
-        VEC_CAPACITY,
-        VEC_SIZE,
-        VEC_NULLPTR,
-        VEC_INVALID,
-    } code;
-} error_t;
+/**
+ * @brief The destructor takes a pointer to an element but SHOULD NOT free the
+ * pointer itself. It should only free the memory allocated for the element.
+ */
+typedef void (*dtor_t)(void *);
+/**
+ * @brief The copy constructor takes a pointer to an element and a pointer to
+ * another element and copies the content of the second element into the first
+ */
+typedef void (*cpctor_t)(void *, const void *);
+
+typedef enum vec_error_u {
+    VEC_OK = 0,
+    VEC_ALLOC,
+    VEC_INDEX,
+    VEC_EMPTY,
+    VEC_CAPACITY,
+    VEC_SIZE,
+    VEC_NULLPTR,
+    VEC_INVALID,
+} vec_error_t;
 
 /**
  * @brief A vector struct
  *
- * @param data the data of the vector
- * @param data_size the size of each element in the vector
+ * @param items the data of the vector
+ * @param item_size the size of each element in the vector
  * @param nmemb the number of elements in the vector
- * @param capacity the capacity of the vector
+ * @param capacity the capacity of the vector (the maximum number of elements)
+ * (changes dynamically)
  * @param dtor the destructor function for the elements in the vector
  * @param cpctor the copy constructor function for the elements in the vector
  */
 typedef struct vector_s {
-    error_t error;
-    u_char *data;
-    size_t data_size;
+    u_char *items;
+    size_t item_size;
     size_t nmemb;
     size_t capacity;
     dtor_t dtor;
@@ -55,10 +64,11 @@ vector_t *vec_new(size_t elem_size, dtor_t, cpctor_t);
 void vec_delete(vector_t *vec);
 
 /**
- * @brief preallocates memory for the vector
+ * @brief preallocates memory for the vector, reserving space for at least
+ * `additional` elements
  * @return Sets the error code to VEC_ALLOC if the allocation fails
  */
-error_t vec_reserve(vector_t *vec, size_t additional);
+vec_error_t vec_reserve(vector_t *vec, size_t additional);
 
 /**
  * @brief intialize a vector with preallocated memory of size * elem_size
@@ -82,7 +92,7 @@ void *vec_swap_remove(vector_t *vec, size_t index);
  * deallocated after the call if necessary.
  * @return Sets the error code to VEC_INDEX if the index is out of bounds
  */
-error_t vec_insert(vector_t *vec, void *elem, size_t index);
+vec_error_t vec_insert(vector_t *vec, const void *elem, size_t index);
 
 /**
  * @brief Removes an element at position `index` within the vector, shifting
@@ -90,6 +100,12 @@ error_t vec_insert(vector_t *vec, void *elem, size_t index);
  * The element is not deallocated, so the caller is responsible for freeing it.
  */
 void *vec_remove(vector_t *vec, size_t index);
+
+/**
+ * @brief Deletes the element at position `index` within the vector.
+ * The element is deallocated using the destructor function.
+ */
+vec_error_t vec_delete_at(vector_t *vec, size_t index);
 
 /**
  * @brief Retains only the elements specified by the predicate.
@@ -104,7 +120,7 @@ void *vec_remove(vector_t *vec, size_t index);
  * }
  *
  * int main() {
- *     vector_t *vec = vec_new(sizeof(int), NULL);
+ *     vector_t *vec = vec_new(sizeof(int), NULL; NULL);
  *     for (int i = 0; i < 10; i++) {
  *         vec_push(vec, &i);
  *     }
@@ -122,27 +138,26 @@ void vec_retain_if(vector_t *vec, bool (*f)(const void *));
  * The element is copied into the vector, so the original can be safely
  * deallocated after the call if necessary.
  */
-error_t vec_push(vector_t *vec, void *elem);
+vec_error_t vec_push(vector_t *vec, const void *elem);
 
 /**
- * @brief Removes the last element from the vector and returns it.
- * The element is not deallocated, so the caller is responsible for freeing it.
+ * @brief Removes the last element from the vector.
  */
-void *vec_pop(vector_t *vec);
+vec_error_t vec_pop(vector_t *vec);
 
 /**
  * @brief Moves all the elements of `dest` into `src` leaving `dest` empty.
  * The elements are copied into `dest`, and the original elements from `src`
  * are deallocated.
  */
-void vec_append(vector_t *dest, vector_t *src);
+vec_error_t vec_append(vector_t *dest, vector_t *src);
 
 /**
  * @brief Clears the vector, deallocating all elements.
  */
 void vec_clear(vector_t *vec);
 
-void vec_is_empty(vector_t *vec);
+bool vec_is_empty(vector_t *vec);
 
 /**
  * @brief Splits the collection into two at the given index.
@@ -158,7 +173,7 @@ vector_t *vec_split_off(vector_t *vec, size_t at);
 /**
  * @brief Extend the vector by `n` clones of value.
  */
-error_t vec_extend_with(vector_t *vec, const void *element);
+vec_error_t vec_extend_with(vector_t *vec, const void *element);
 
 /**
  * @brief Removes consecutive repeated elements from the vector. Uses the

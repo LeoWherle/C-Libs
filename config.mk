@@ -9,4 +9,5 @@ NAME=a.out
 
 LIBS = 	clist \
 		cbuffer \
+		buffer \
 		serrorh
