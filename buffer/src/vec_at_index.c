@@ -44,7 +44,7 @@ static void vec_remove_element(vector_t *vec, size_t index, void *item)
     vec->nmemb--;
 }
 
-static inline bool is_valid_index(vector_t *vec, size_t index)
+static bool is_valid_index(const vector_t *vec, size_t index)
 {
     return (vec != NULL && index < vec->nmemb);
 }
@@ -100,4 +100,12 @@ void *vec_swap_remove(vector_t *vec, size_t index)
     }
     vec->nmemb--;
     return (copy);
+}
+
+void *vec_at(const vector_t *vec, size_t index)
+{
+    if (!is_valid_index(vec, index)) {
+        return (NULL);
+    }
+    return (vec->items + (index * vec->item_size));
 }

@@ -29,6 +29,7 @@ vector_t *vec_new(size_t elem_size, dtor_t dtor, cpctor_t cpctor)
 vec_error_t vec_reserve(vector_t *vec, size_t additional)
 {
     u_char *items_new = NULL;
+
     if (vec == NULL) {
         return (VEC_NULLPTR);
     }
@@ -56,4 +57,47 @@ vector_t *vec_with_capacity(
         return (NULL);
     }
     return (vec);
+}
+
+vector_t *vec_clone(const vector_t *vec)
+{
+    vector_t *new_vec = NULL;
+
+    new_vec =
+        vec_with_capacity(vec->nmemb, vec->item_size, vec->dtor, vec->cpctor);
+    if (new_vec == NULL) {
+        return (NULL);
+    }
+    if (vec->cpctor != NULL) {
+        for (size_t i = 0; i < vec->nmemb; i++) {
+            vec->cpctor(new_vec->items + (i * vec->item_size),
+                vec->items + (i * vec->item_size));
+        }
+    } else {
+        memcpy(new_vec->items, vec->items, vec->nmemb * vec->item_size);
+    }
+    new_vec->nmemb = vec->nmemb;
+    return (new_vec);
+}
+
+vec_error_t vec_extend_with(vector_t *vec, const void *element, size_t n)
+{
+    if (vec == NULL) {
+        return (VEC_NULLPTR);
+    }
+    if (vec_reserve(vec, n) != VEC_OK) {
+        return (VEC_ALLOC);
+    }
+    if (vec->cpctor != NULL) {
+        for (size_t i = 0; i < n; i++) {
+            vec->cpctor(vec->items + (vec->nmemb * vec->item_size), element);
+        }
+    } else {
+        for (size_t i = 0; i < n; i++) {
+            memcpy(vec->items + (vec->nmemb * vec->item_size), element,
+                vec->item_size);
+        }
+    }
+    vec->nmemb += n;
+    return (VEC_OK);
 }

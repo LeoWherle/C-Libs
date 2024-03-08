@@ -7,6 +7,7 @@
 
 #include "vector.h"
 #include <string.h>
+#pragma GCC diagnostic ignored "-Wunused-result"
 
 vec_error_t vec_append(vector_t *dest, vector_t *src)
 {
@@ -19,7 +20,7 @@ vec_error_t vec_append(vector_t *dest, vector_t *src)
         return (VEC_ALLOC);
     }
     for (; i < src->nmemb; i++) {
-        vec_push(dest, src->items + (i * src->item_size));
+        (void) vec_push(dest, src->items + (i * src->item_size));
     }
     vec_clear(src);
     return (VEC_OK);
