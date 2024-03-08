@@ -5,6 +5,9 @@
 *.log
 *.temp
 
+# Documentation
+generated-docs/
+
 # CMake
 CMakeCache.txt
 CMakeFiles/
