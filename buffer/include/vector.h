@@ -12,23 +12,7 @@
 #include <sys/types.h>
 
 typedef void (*dtor_t)(void *);
-typedef signed int sint32_t;
-
-/**
- * @brief A vector struct
- *
- * @param data the data of the vector
- * @param elem_size the size of each element in the vector
- * @param size the size of the vector
- * @param capacity the capacity of the vector
- */
-typedef struct vector_s {
-    u_char *data;
-    size_t elem_size;
-    size_t size;
-    size_t capacity;
-    dtor_t dtor;
-} vector_t;
+typedef void (*cpctor_t)(void);
 
 typedef struct error_t {
     enum {
@@ -44,29 +28,50 @@ typedef struct error_t {
 } error_t;
 
 /**
- * @brief intialize a vector with preallocated memory of size * elem_size
- * @param dtor can be NULL if no destructor is needed
+ * @brief A vector struct
+ *
+ * @param data the data of the vector
+ * @param data_size the size of each element in the vector
+ * @param nmemb the number of elements in the vector
+ * @param capacity the capacity of the vector
+ * @param dtor the destructor function for the elements in the vector
+ * @param cpctor the copy constructor function for the elements in the vector
  */
-vector_t *vec_with_capacity(size_t size, size_t elem_size, dtor_t);
+typedef struct vector_s {
+    error_t error;
+    u_char *data;
+    size_t data_size;
+    size_t nmemb;
+    size_t capacity;
+    dtor_t dtor;
+    cpctor_t cpctor;
+} vector_t;
 
 /**
  * @brief creates a new vector with a given element size
  * @param dtor can be NULL if no destructor is needed
  */
-vector_t *vec_new(size_t elem_size, dtor_t);
+vector_t *vec_new(size_t elem_size, dtor_t, cpctor_t);
 void vec_delete(vector_t *vec);
 
 /**
  * @brief preallocates memory for the vector
+ * @return Sets the error code to VEC_ALLOC if the allocation fails
  */
 error_t vec_reserve(vector_t *vec, size_t additional);
+
+/**
+ * @brief intialize a vector with preallocated memory of size * elem_size
+ * @param dtor can be NULL if no destructor is needed
+ */
+vector_t *vec_with_capacity(size_t size, size_t elem_size, dtor_t, cpctor_t);
 
 /**
  * @brief Removes an element from the vector and returns it. Places the last
  * element in the vector in the position of the removed element. Use vec_remove
  * if you want to keep the order of the elements.
  * @return The element is not deallocated, so the caller is responsible for
- * freeing it.
+ * freeing it. (It is reallocated)
  */
 void *vec_swap_remove(vector_t *vec, size_t index);
 
@@ -75,6 +80,7 @@ void *vec_swap_remove(vector_t *vec, size_t index);
  * all elements after it to the right.
  * The element is copied into the vector, so the original can be safely
  * deallocated after the call if necessary.
+ * @return Sets the error code to VEC_INDEX if the index is out of bounds
  */
 error_t vec_insert(vector_t *vec, void *elem, size_t index);
 
@@ -152,7 +158,7 @@ vector_t *vec_split_off(vector_t *vec, size_t at);
 /**
  * @brief Extend the vector by `n` clones of value.
  */
-error_t vec_extend_with(vector_t *vec, void *element);
+error_t vec_extend_with(vector_t *vec, const void *element);
 
 /**
  * @brief Removes consecutive repeated elements from the vector. Uses the
@@ -165,24 +171,34 @@ void vec_dedup(vector_t *vec, bool (*eq)(const void *, const void *));
  * vector, so the original can be safely deallocated after the call if
  * necessary.
  */
-vector_t *vec_clone(vector_t *vec);
+vector_t *vec_clone(const vector_t *vec);
 
-vector_t *vec_print(vector_t *vec, void (*print)(const void *), char *sep);
+vector_t *vec_print(
+    const vector_t *vec, void (*print)(const void *), char *sep);
 
-void *vec_sort(vector_t *vec, sint32_t (*cmp)(const void *, const void *));
+// Uses qsort_r
+void *vec_sort(vector_t *vec, int (*cmp)(const void *, const void *));
 
 void vec_foreach(vector_t *vec, void (*f)(void *));
+// Use a local struct to pass multiple arguments to the function if needed
 void vec_foreach_with_arg(vector_t *vec, void (*f)(void *, void *), void *arg);
 
-void *vec_find(
-    vector_t *vec, bool (*f)(const void *, const void *), const void *match);
+void *vec_find(const vector_t *vec, bool (*f)(const void *, const void *),
+    const void *match);
 
-vector_t *vec_filter(
-    vector_t *vec, bool (*f)(const void *, const void *), const void *match);
+/**
+ * @brief Returns a new vector containing the elements of the original vector
+ * for which the predicate returns `true`.
+ */
+vector_t *vec_filter(const vector_t *vec,
+    bool (*f)(const void *, const void *), const void *match);
 
-vector_t *vec_map(vector_t *vec, void *(*f)(const void *));
+vector_t *vec_map(const vector_t *vec, void *(*f)(const void *) );
+
+// Use a local struct to pass multiple arguments to the function if needed
 vector_t *vec_map_with_arg(
-    vector_t *vec, void *(*f)(const void *, void *), void *arg);
+    const vector_t *vec, void *(*f)(const void *, void *), void *arg);
 
-// unsafe, use with caution (no bounds checking)
-void *vec_get(vector_t *vec, size_t index);
+// UNSAFE, use with caution (no bounds checking) and only if you know what you
+// are doing
+void *vec_get(const vector_t *vec, size_t index);

@@ -5,5 +5,5 @@
 ## Makefile
 ##
 
-NAME=buf
-LIBNAME=libnbuf.a
+NAME=buffer
+LIBNAME=libnbuffer.a
