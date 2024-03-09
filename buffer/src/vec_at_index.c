@@ -19,14 +19,13 @@ vec_error_t vec_insert(vector_t *vec, const void *elem, size_t index)
     if (vec_reserve(vec, 1) != VEC_OK)
         return (VEC_ALLOC);
     if (index < vec->nmemb) {
-        memmove(vec->items + ((index + 1) * vec->item_size),
-            vec->items + (index * vec->item_size),
-            (vec->nmemb - index) * vec->item_size);
+        memmove(VEC_AT(vec, index + 1), VEC_AT(vec, index),
+            VEC_BYTES_LEFT(vec, index));
     }
     if (vec->cpctor != NULL) {
-        vec->cpctor(vec->items + (index * vec->item_size), elem);
+        vec->cpctor(VEC_AT(vec, index), elem);
     } else {
-        memcpy(vec->items + (index * vec->item_size), elem, vec->item_size);
+        memcpy(VEC_AT(vec, index), elem, vec->item_size);
     }
     vec->nmemb++;
     return (VEC_OK);
@@ -38,8 +37,7 @@ static void vec_remove_element(vector_t *vec, size_t index, void *item)
         vec->dtor(item);
     }
     if (index != vec->nmemb - 1) {
-        memmove(item, item + vec->item_size,
-            (vec->nmemb - index + 1) * vec->item_size);
+        memmove(item, item + vec->item_size, VEC_BYTES_LEFT(vec, index + 1));
     }
     vec->nmemb--;
 }
@@ -51,13 +49,10 @@ static bool is_valid_index(const vector_t *vec, size_t index)
 
 vec_error_t vec_delete_at(vector_t *vec, size_t index)
 {
-    void *item = NULL;
-
     if (!is_valid_index(vec, index)) {
         return (VEC_INDEX);
     }
-    item = vec->items + (index * vec->item_size);
-    vec_remove_element(vec, index, item);
+    vec_remove_element(vec, index, VEC_AT(vec, index));
     return (VEC_OK);
 }
 
@@ -70,9 +65,10 @@ void *vec_remove(vector_t *vec, size_t index)
         return (NULL);
     }
     copy = malloc(vec->item_size);
-    if (copy == NULL)
+    if (copy == NULL) {
         return (NULL);
-    item = vec->items + (index * vec->item_size);
+    }
+    item = VEC_AT(vec, index);
     copy = memcpy(copy, item, vec->item_size);
     vec_remove_element(vec, index, item);
     return (copy);
@@ -90,13 +86,12 @@ void *vec_swap_remove(vector_t *vec, size_t index)
     if (copy == NULL) {
         return (NULL);
     }
-    item = vec->items + (index * vec->item_size);
+    item = VEC_AT(vec, index);
     copy = memcpy(copy, item, vec->item_size);
     if (vec->dtor != NULL)
         vec->dtor(item);
     if (index != vec->nmemb - 1) {
-        memmove(item, vec->items + ((vec->nmemb - 1) * vec->item_size),
-            vec->item_size);
+        memmove(item, VEC_AT(vec, vec->nmemb - 1), vec->item_size);
     }
     vec->nmemb--;
     return (copy);
@@ -107,5 +102,5 @@ void *vec_at(const vector_t *vec, size_t index)
     if (!is_valid_index(vec, index)) {
         return (NULL);
     }
-    return (vec->items + (index * vec->item_size));
+    return (VEC_AT(vec, index));
 }

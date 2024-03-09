@@ -95,8 +95,8 @@ fclean: clean
 re: fclean all
 
 tests_run: $(CFLAGS) += $(CRITFLAGS)
-tests_run: $(OBJ_CRIT) $(OBJ_SRC_CRIT)
-	@gcc -o unit-tests $(OBJ_SRC_CRIT) $(OBJ_CRIT) $(CFLAGS) $(CRITFLAGS)
+tests_run: $(OBJ_CRIT)
+	@gcc -o unit-tests $(SRC) $(OBJ_CRIT) $(CFLAGS) $(CRITFLAGS)
 	@echo "[$(GREEN)Launch tests $(LIBNAME)$(RESET)]"
 	@./unit-tests
 

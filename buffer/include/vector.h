@@ -18,7 +18,19 @@
     #define WUR __attribute__((warn_unused_result))
 #endif
 
+/**
+ * @brief A macro to get the pointer to the element at the given index
+ */
 #define VEC_AT(vec, index) ((vec)->items + (index) * (vec)->item_size)
+/**
+ * @brief A macro to get the number of elements left after the given index
+ */
+#define VEC_ELEM_LEFT(vec, indx) ((vec)->nmemb - (indx))
+/**
+ * @brief A macro to get the number of bytes left after the given index
+ */
+#define VEC_BYTES_LEFT(vec, indx) (VEC_ELEM_LEFT(vec, indx) * (vec)->item_size)
+
 
 /**
  * @brief The destructor takes a pointer to an element but SHOULD NOT free the

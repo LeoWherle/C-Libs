@@ -22,7 +22,7 @@ void vec_print(const vector_t *vec, void (*print)(const void *),
     printf("[");
     for (; i < vec->nmemb; i++) {
         printf("%s", default_sep);
-        print(vec->items + (i * vec->item_size));
+        print(VEC_AT(vec, i));
         default_sep = sep;
     }
     printf("]");
@@ -47,7 +47,7 @@ void vec_display(const vector_t *vec, void (*print)(const void *),
     put("[");
     for (; i < vec->nmemb; i++) {
         put(default_sep);
-        print(vec->items + (i * vec->item_size));
+        print(VEC_AT(vec, i));
         default_sep = sep;
     }
     put("]");

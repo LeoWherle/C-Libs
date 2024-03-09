@@ -17,10 +17,9 @@ vec_error_t vec_push(vector_t *vec, const void *item)
         return (VEC_ALLOC);
     }
     if (vec->cpctor != NULL) {
-        vec->cpctor(vec->items + (vec->nmemb * vec->item_size), item);
+        vec->cpctor(VEC_AT(vec, vec->nmemb), item);
     } else {
-        memcpy(
-            vec->items + (vec->nmemb * vec->item_size), item, vec->item_size);
+        memcpy(VEC_AT(vec, vec->nmemb), item, vec->item_size);
     }
     vec->nmemb++;
     return (VEC_OK);
@@ -35,7 +34,7 @@ vec_error_t vec_pop(vector_t *vec)
         return (VEC_EMPTY);
     }
     if (vec->dtor != NULL) {
-        vec->dtor(vec->items + ((vec->nmemb - 1) * vec->item_size));
+        vec->dtor(VEC_AT(vec, vec->nmemb - 1));
     }
     vec->nmemb--;
     return (VEC_OK);

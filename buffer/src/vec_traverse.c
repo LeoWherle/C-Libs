@@ -15,7 +15,7 @@ void vec_foreach(vector_t *vec, void (*fun)(void *))
     if (vec == NULL || fun == NULL)
         return;
     for (; i < vec->nmemb; i++) {
-        fun(vec->items + (i * vec->item_size));
+        fun(VEC_AT(vec, i));
     }
 }
 
@@ -26,7 +26,7 @@ void vec_foreach_arg(vector_t *vec, void (*fun)(void *, void *), void *arg)
     if (vec == NULL || fun == NULL)
         return;
     for (; i < vec->nmemb; i++) {
-        fun(vec->items + (i * vec->item_size), arg);
+        fun(VEC_AT(vec, i), arg);
     }
 }
 
@@ -37,8 +37,8 @@ void *vec_find(const vector_t *vec, bool (*fun)(const void *))
     if (vec == NULL || fun == NULL)
         return NULL;
     for (; i < vec->nmemb; i++) {
-        if (fun(vec->items + (i * vec->item_size))) {
-            return vec->items + (i * vec->item_size);
+        if (fun(VEC_AT(vec, i))) {
+            return VEC_AT(vec, i);
         }
     }
     return NULL;
@@ -52,8 +52,8 @@ void *vec_find_arg(
     if (vec == NULL || fun == NULL)
         return NULL;
     for (; i < vec->nmemb; i++) {
-        if (fun(vec->items + (i * vec->item_size), arg)) {
-            return vec->items + (i * vec->item_size);
+        if (fun(VEC_AT(vec, i), arg)) {
+            return VEC_AT(vec, i);
         }
     }
     return NULL;
@@ -67,7 +67,7 @@ size_t vec_count(const vector_t *vec, bool (*fun)(const void *))
     if (vec == NULL || fun == NULL)
         return 0;
     for (; i < vec->nmemb; i++) {
-        if (fun(vec->items + (i * vec->item_size))) {
+        if (fun(VEC_AT(vec, i))) {
             count++;
         }
     }

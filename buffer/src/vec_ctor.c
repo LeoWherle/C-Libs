@@ -82,8 +82,7 @@ vector_t *vec_clone(const vector_t *vec)
     }
     if (vec->cpctor != NULL) {
         for (size_t i = 0; i < vec->nmemb; i++) {
-            vec->cpctor(new_vec->items + (i * vec->item_size),
-                vec->items + (i * vec->item_size));
+            vec->cpctor(VEC_AT(new_vec, i), VEC_AT(vec, i));
         }
     } else {
         memcpy(new_vec->items, vec->items, vec->nmemb * vec->item_size);
@@ -102,13 +101,11 @@ vec_error_t vec_extend_with(vector_t *vec, const void *element, size_t n)
     }
     if (vec->cpctor != NULL) {
         for (size_t i = 0; i < n; i++) {
-            vec->cpctor(
-                vec->items + ((vec->nmemb + i) * vec->item_size), element);
+            vec->cpctor(VEC_AT(vec, vec->nmemb + i), element);
         }
     } else {
         for (size_t i = 0; i < n; i++) {
-            memcpy(vec->items + ((vec->nmemb + i) * vec->item_size), element,
-                vec->item_size);
+            memcpy(VEC_AT(vec, vec->nmemb + i), element, vec->item_size);
         }
     }
     vec->nmemb += n;

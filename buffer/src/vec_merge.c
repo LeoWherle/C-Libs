@@ -20,7 +20,7 @@ vec_error_t vec_append(vector_t *dest, vector_t *src)
         return (VEC_ALLOC);
     }
     for (; i < src->nmemb; i++) {
-        (void) vec_push(dest, src->items + (i * src->item_size));
+        (void) vec_push(dest, VEC_AT(src, i));
     }
     vec_clear(src);
     return (VEC_OK);
@@ -38,11 +38,9 @@ vector_t *vec_split_off(vector_t *vec, size_t index)
     if (new_vec == NULL) {
         return (NULL);
     }
-    memcpy(new_vec->items, vec->items + (index * vec->item_size),
-        (vec->nmemb - index) * vec->item_size);
+    memcpy(new_vec->items, VEC_AT(vec, index), VEC_BYTES_LEFT(vec, index));
     new_vec->nmemb = vec->nmemb - index;
-    memset(vec->items + (index * vec->item_size), 0,
-        (vec->nmemb - index) * vec->item_size);
+    memset(VEC_AT(vec, index), 0, VEC_BYTES_LEFT(vec, index));
     vec->nmemb = index;
     return (new_vec);
 }

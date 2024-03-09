@@ -22,7 +22,7 @@ vector_t *vec_map(const vector_t *vec, const map_fn_t fun)
     if (new_vec == NULL)
         return NULL;
     for (; i < vec->nmemb; i++) {
-        ret = fun(vec->items + (i * vec->item_size));
+        ret = fun(VEC_AT(vec, i));
         if (ret == NULL) {
             vec_delete(new_vec);
             return NULL;
@@ -44,7 +44,7 @@ vector_t *vec_map_arg(const vector_t *vec, const map_fn_arg_t fun, void *arg)
     if (new_vec == NULL)
         return NULL;
     for (; i < vec->nmemb; i++) {
-        ret = fun(vec->items + (i * vec->item_size), arg);
+        ret = fun(VEC_AT(vec, i), arg);
         if (ret == NULL) {
             vec_delete(new_vec);
             return NULL;
@@ -70,9 +70,9 @@ vector_t *vec_filter(const vector_t *vec, const filter_fn_t fun)
         return NULL;
     }
     for (; i < vec->nmemb; i++) {
-        ret = fun(vec->items + (i * vec->item_size));
+        ret = fun(VEC_AT(vec, i));
         if (ret) {
-            (void) vec_push(new_vec, vec->items + (i * vec->item_size));
+            (void) vec_push(new_vec, VEC_AT(vec, i));
         }
     }
     return new_vec;

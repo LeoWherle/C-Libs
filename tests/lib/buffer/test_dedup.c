@@ -32,11 +32,82 @@ Test(dedup, test_dedup)
 
     vec_dedup(vec, int_eq);
 
-    vec_print_int(vec);
     cr_assert(vec->nmemb == 4, "vec->nmemb = %ld", vec->nmemb);
     cr_assert_eq(*vec_at_int(vec, 0), 2);
     cr_assert_eq(*vec_at_int(vec, 1), 1);
     cr_assert_eq(*vec_at_int(vec, 2), 3);
     cr_assert_eq(*vec_at_int(vec, 3), 4);
+    vec_delete(vec);
+}
+
+Test(dedup, test_dedup_big)
+{
+    vector_t *vec = vec_new(sizeof(int), NULL, NULL);
+
+    for (int i = 0; i < 1000; i++) {
+        if (vec_push_int(vec, i) != VEC_OK) {
+            cr_assert_eq(false, true);
+        }
+    }
+    for (int i = 0; i < 1000; i++) {
+        if (vec_push_int(vec, i) != VEC_OK) {
+            cr_assert_eq(false, true);
+        }
+    }
+    vec_dedup(vec, int_eq);
+
+    cr_assert(vec->nmemb == 1000, "vec->nmemb = %ld", vec->nmemb);
+    for (int i = 0; i < 1000; i++) {
+        cr_assert_eq(*vec_at_int(vec, i), i);
+    }
+    vec_delete(vec);
+}
+
+Test(dedup, test_dedup_empty)
+{
+    vector_t *vec = vec_new(sizeof(int), NULL, NULL);
+
+    vec_dedup(vec, int_eq);
+
+    cr_assert(vec->nmemb == 0, "vec->nmemb = %ld", vec->nmemb);
+    vec_delete(vec);
+}
+
+Test(dedup, test_dedup_one)
+{
+    vector_t *vec = vec_new(sizeof(int), NULL, NULL);
+
+    vec_push_int(vec, 1);
+    vec_dedup(vec, int_eq);
+
+    cr_assert(vec->nmemb == 1, "vec->nmemb = %ld", vec->nmemb);
+    cr_assert_eq(*vec_at_int(vec, 0), 1);
+    vec_delete(vec);
+}
+
+Test(dedup, test_dedup_two)
+{
+    vector_t *vec = vec_new(sizeof(int), NULL, NULL);
+
+    vec_push_int(vec, 1);
+    vec_push_int(vec, 1);
+    vec_dedup(vec, int_eq);
+
+    cr_assert(vec->nmemb == 1, "vec->nmemb = %ld", vec->nmemb);
+    cr_assert_eq(*vec_at_int(vec, 0), 1);
+    vec_delete(vec);
+}
+
+Test(dedup, test_dedup_three)
+{
+    vector_t *vec = vec_new(sizeof(int), NULL, NULL);
+
+    vec_push_int(vec, 1);
+    vec_push_int(vec, 1);
+    vec_push_int(vec, 1);
+    vec_dedup(vec, int_eq);
+
+    cr_assert(vec->nmemb == 1, "vec->nmemb = %ld", vec->nmemb);
+    cr_assert_eq(*vec_at_int(vec, 0), 1);
     vec_delete(vec);
 }
