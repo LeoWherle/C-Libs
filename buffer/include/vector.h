@@ -18,6 +18,8 @@
     #define WUR __attribute__((warn_unused_result))
 #endif
 
+#define VEC_AT(vec, index) ((vec)->items + (index) * (vec)->item_size)
+
 /**
  * @brief The destructor takes a pointer to an element but SHOULD NOT free the
  * pointer itself. It should only free the memory allocated for the element.

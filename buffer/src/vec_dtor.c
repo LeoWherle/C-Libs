@@ -66,19 +66,21 @@ void vec_retain_if(vector_t *vec, bool (*fun)(const void *))
     vec->nmemb = j;
 }
 
-static bool vec_has_indentical(vector_t *vec, size_t pos,
-    bool (*eq)(const void *, const void *), size_t *same_pos)
+static size_t vec_remove_if_dup(vector_t *vec,
+    bool (*eq)(const void *, const void *), size_t original, size_t other)
 {
-    size_t i = pos + 1;
+    size_t new_other = other;
 
-    for (; i < vec->nmemb; i++) {
-        if (eq(vec->items + (pos * vec->item_size),
-                vec->items + (i * vec->item_size))) {
-            *same_pos = i;
-            return true;
+    if (eq(VEC_AT(vec, original), VEC_AT(vec, other))) {
+        if (vec->dtor != NULL) {
+            vec->dtor(vec->items + (other * vec->item_size));
         }
+        memcpy(VEC_AT(vec, other), VEC_AT(vec, other + 1),
+            (vec->nmemb - other) * vec->item_size);
+        vec->nmemb--;
+        new_other--;
     }
-    return false;
+    return new_other;
 }
 
 // TO TEST, should work though
@@ -86,20 +88,13 @@ void vec_dedup(vector_t *vec, bool (*eq)(const void *, const void *))
 {
     size_t i = 0;
     size_t j = 0;
-    bool ret = false;
 
-    if (vec == NULL || eq == NULL)
+    if (vec == NULL || eq == NULL) {
         return;
+    }
     for (; i < vec->nmemb; i++) {
-        ret = vec_has_indentical(vec, i, eq, &j);
-        if (ret && vec->dtor != NULL) {
-            vec->dtor(vec->items + (j * vec->item_size));
-        }
-        if (ret) {
-            memmove(vec->items + (j * vec->item_size),
-                vec->items + ((j + 1) * vec->item_size),
-                (vec->nmemb - j - 1) * vec->item_size);
-            vec->nmemb--;
+        for (j = i + 1; j < vec->nmemb; j++) {
+            j = vec_remove_if_dup(vec, eq, i, j);
         }
     }
 }
