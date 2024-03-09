@@ -95,8 +95,8 @@ void *vec_swap_remove(vector_t *vec, size_t index)
     if (vec->dtor != NULL)
         vec->dtor(item);
     if (index != vec->nmemb - 1) {
-        memmove(
-            item, vec->items + ((vec->nmemb - 1) * vec->item_size), vec->item_size);
+        memmove(item, vec->items + ((vec->nmemb - 1) * vec->item_size),
+            vec->item_size);
     }
     vec->nmemb--;
     return (copy);

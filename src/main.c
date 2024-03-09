@@ -29,7 +29,7 @@ int main(int ac, char *av[])
             return (84);
         }
     }
-    if(vec_reserve(vec, 2000) != VEC_OK) {
+    if (vec_reserve(vec, 2000) != VEC_OK) {
         perror("Error");
         return (84);
     }

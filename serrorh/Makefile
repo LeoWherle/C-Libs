@@ -67,7 +67,7 @@ $(BUILD_DIR)$(LIBNAME): $(OBJ)
 all:	$(LIBNAME)
 
 clean:
-	@rm -f $(OBJ) *~ *.gcno *.gcda #*#
+	@rm -f $(OBJ) *~ *.gcno *.gcda $(OBJ_SRC_CRIT) $(OBJ_CRIT) #*#
 	@echo "[$(YELLOW)Cleaned $(LIBNAME)$(RESET)]"
 
 fclean: clean
