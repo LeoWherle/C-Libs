@@ -52,7 +52,7 @@ typedef enum vec_error_u {
  * @param cpctor the copy constructor function for the elements in the vector
  */
 typedef struct vector_s {
-    u_char *items;
+    void *items;
     size_t item_size;
     size_t nmemb;
     size_t capacity;
@@ -203,8 +203,8 @@ WUR vector_t *vec_clone(const vector_t *vec);
  * `printf("%d", *(int)elem)`.
  * @param sep can be NULL and ", " will be used as the separator
  */
-void vec_print(
-    const vector_t *vec, void (*print)(const void *), const char *sep);
+void vec_print(const vector_t *vec, void (*print)(const void *),
+    const char *sep, const char *end);
 /**
  * @brief Same as vec_print but uses a custom function to print the separators
  * This doesn't make printf a requirement within the print function

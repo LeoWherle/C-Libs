@@ -7,6 +7,7 @@
 
 # Documentation
 generated-docs/
+gcovr/
 
 # CMake
 CMakeCache.txt

@@ -30,7 +30,7 @@ vector_t *vec_split_off(vector_t *vec, size_t index)
 {
     vector_t *new_vec = NULL;
 
-    if (vec == NULL || index >= vec->nmemb) {
+    if (vec == NULL || index > vec->nmemb) {
         return (NULL);
     }
     new_vec = vec_with_capacity(

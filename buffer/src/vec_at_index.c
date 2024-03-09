@@ -12,7 +12,7 @@
 
 vec_error_t vec_insert(vector_t *vec, const void *elem, size_t index)
 {
-    if (vec == NULL)
+    if (vec == NULL || elem == NULL)
         return (VEC_NULLPTR);
     if (index > vec->nmemb)
         return (VEC_INDEX);
@@ -39,7 +39,7 @@ static void vec_remove_element(vector_t *vec, size_t index, void *item)
     }
     if (index != vec->nmemb - 1) {
         memmove(item, item + vec->item_size,
-            (vec->nmemb - index - 1) * vec->item_size);
+            (vec->nmemb - index + 1) * vec->item_size);
     }
     vec->nmemb--;
 }
@@ -96,7 +96,7 @@ void *vec_swap_remove(vector_t *vec, size_t index)
         vec->dtor(item);
     if (index != vec->nmemb - 1) {
         memmove(
-            item, item + ((vec->nmemb - 2) * vec->item_size), vec->item_size);
+            item, vec->items + ((vec->nmemb - 1) * vec->item_size), vec->item_size);
     }
     vec->nmemb--;
     return (copy);

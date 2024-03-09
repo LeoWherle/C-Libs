@@ -10,7 +10,7 @@
 
 vec_error_t vec_push(vector_t *vec, const void *item)
 {
-    if (vec == NULL) {
+    if (vec == NULL || item == NULL) {
         return (VEC_NULLPTR);
     }
     if (vec_reserve(vec, 1) != VEC_OK) {

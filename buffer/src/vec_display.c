@@ -8,8 +8,8 @@
 #include "vector.h"
 #include <stdio.h>
 
-void vec_print(
-    const vector_t *vec, void (*print)(const void *), const char *sep)
+void vec_print(const vector_t *vec, void (*print)(const void *),
+    const char *sep, const char *end)
 {
     size_t i = 0;
     const char *default_sep = "";
@@ -26,6 +26,11 @@ void vec_print(
         default_sep = sep;
     }
     printf("]");
+    if (end != NULL) {
+        printf("%s", end);
+    } else {
+        printf("\n");
+    }
 }
 
 void vec_display(const vector_t *vec, void (*print)(const void *),

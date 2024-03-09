@@ -30,20 +30,20 @@ static void print_double(const void *elem)
 
 void vec_print_int(const vector_t *vec)
 {
-    vec_print(vec, &print_int, NULL);
+    vec_print(vec, &print_int, NULL, NULL);
 }
 
 void vec_print_char(const vector_t *vec)
 {
-    vec_print(vec, &print_char, NULL);
+    vec_print(vec, &print_char, NULL, NULL);
 }
 
 void vec_print_float(const vector_t *vec)
 {
-    vec_print(vec, &print_float, NULL);
+    vec_print(vec, &print_float, NULL, NULL);
 }
 
 void vec_print_double(const vector_t *vec)
 {
-    vec_print(vec, &print_double, NULL);
+    vec_print(vec, &print_double, NULL, NULL);
 }
