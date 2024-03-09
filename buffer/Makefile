@@ -32,6 +32,8 @@ SRC_CRIT = $(SRC)
 TEST_CRIT = $(CRIT_LIST)
 
 OBJ = 	$(SRC:%.c=$(BUILD_DIR)$(NAME)/%.o)
+OBJ_CRIT = $(CRIT_LIST:%.c=$(BUILD_DIR)$(NAME)/%.o)
+OBJ_SRC_CRIT = $(SRC:%.c=$(BUILD_DIR)tests/$(NAME)/%.o)
 DEPS = 	$(OBJ:%.o=%.d)
 
 CFLAGS = -W -Wall -Wextra -Iinclude
@@ -48,6 +50,10 @@ else ifeq ($(DEBUG), y)
 else
 	CFLAGS += -g
 endif
+
+$(BUILD_DIR)tests/$(NAME)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $^ -c -o $@
 
 $(BUILD_DIR)$(NAME)/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -70,8 +76,9 @@ fclean: clean
 
 re: fclean all
 
-tests_run:
-	@gcc -o unit-tests $(SRC_CRIT) $(TEST_CRIT) $(CFLAGS) $(CRITFLAGS)
+tests_run: $(CFLAGS) += $(CRITFLAGS)
+tests_run: $(OBJ_CRIT) $(OBJ_SRC_CRIT)
+	@gcc -o unit-tests $(OBJ_SRC_CRIT) $(OBJ_CRIT) $(CFLAGS) $(CRITFLAGS)
 	@echo "[$(GREEN)Launch tests $(LIBNAME)$(RESET)]"
 	@./unit-tests
 
