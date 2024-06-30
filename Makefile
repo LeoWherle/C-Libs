@@ -26,55 +26,69 @@ BUILD_DIR = build/
 
 MAKE  = make --no-print-directory
 CC = gcc
+
+RULE =
+# used with make DEBUG=n
+ifeq ($(DEBUG), n)
+	CFLAGS += -O2 -march=native -mtune=native -flto -fwhole-program
+	RULE = "DEBUG=n"
+	BUILD_PATH := $(BUILD_DIR)release/
+# used with make DEBUG=y
+else ifeq ($(DEBUG), y)
+	LDFLAGS += -fsanitize=address -fsanitize-address-use-after-scope
+	CFLAGS += -g3 -DDEBUG  -fsanitize=address
+	RULE = "DEBUG=y"
+	BUILD_PATH := $(BUILD_DIR)asan/
+else
+	CFLAGS += -g -fanalyzer
+	LDFLAGS += -fwhole-program -flto
+	BUILD_PATH := $(BUILD_DIR)debug/
+endif
+
 SRC = $(shell find src/ -name "*.c" -type f)
 
 OBJ = 	$(SRC:%.c=$(BUILD_DIR)%.o)
 DEPS = 	$(OBJ:%.o=%.d)
 
-
 LIBINC = $(addsuffix /include, $(addprefix -I, $(LIBS)))
-LIB_FLAGS = -L$(BUILD_DIR) $(addprefix -l, $(LIBS))
+LIB_FLAGS = -L$(BUILD_PATH) $(addprefix -l, $(LIBS))
 
-CFLAGS = -W -Wall -Wextra -Iinclude $(LIBINC)
-LDFLAGS =
+CFLAGS += -W -Wall -Wextra -Iinclude $(LIBINC)
+CFLAGS += -MMD -MP
+LDFLAGS += $(LIB_FLAGS)
 CRITFLAGS = -lcriterion --coverage
-
-FLAGS =
-# used with make DEBUG=n
-ifeq ($(DEBUG), n)
-	CFLAGS += -O2
-	FLAGS = "DEBUG=n"
-# used with make DEBUG=y
-else ifeq ($(DEBUG), y)
-	LDFLAGS = -fsanitize=address -fsanitize-address-use-after-scope
-	CFLAGS += -g3 -DDEBUG  -fsanitize=address
-	FLAGS = "DEBUG=y"
-else
-	CFLAGS += -g
-endif
-
 
 $(BUILD_DIR)%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -c -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME): lib_build	$(OBJ)
-	@$(CC) -o $(NAME) $(OBJ) $(LDFLAGS) $(LIB_FLAGS)
+	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS)
 
 all:	$(NAME)
 	@echo "$(GREEN)✓ Compiled $(NAME)$(RESET)"
+
+-include $(DEPS_SERV)
 
 lib_build:
 	@for i in $(LIBS); do $(MAKE) -C $$i $(RULE); done
 
 clean:
-	@rm -f $(OBJ) *~ *.gcno *.gcda #*#
-	@for i in $(LIBS); do $(MAKE) -C $$i clean; done
+	@rm -rf $(BUILD_DIR)asan $(BUILD_DIR)debug $(BUILD_DIR)release
+	@for j in "DEBUG=n" "DEBUG=y" ""; do \
+	for i in $(LIBS); do $(MAKE) -C $$i clean $$j; done \
+	done
 
 fclean: clean
-	@rm -f $(NAME)
+	@for j in "DEBUG=n" "DEBUG=y" ""; do \
+	for i in $(LIBS); do $(MAKE) -C $$i fclean $$j; done \
+	done
 	@rm -f unit-tests
-	@for i in $(LIBS); do $(MAKE) -C $$i fclean; done
+	@rm -f $(BIN)
+	@rm -f $(BUILD_DIR)asan/$(BIN)
+	@rm -f $(BUILD_DIR)debug/$(BIN)
+	@rm -f $(BUILD_DIR)release/$(BIN)
+	@rm -f ../server.log
 
 re: fclean all
 
@@ -82,5 +96,4 @@ tests_run:
 	@for i in $(LIBS); do $(MAKE) -C $$i tests_run; done
 
 .PHONY: all clean fclean re debug tests_run lib_build
-
--include $(DEPS)
+.NOTPARALLEL: re

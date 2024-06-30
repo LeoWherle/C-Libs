@@ -24,12 +24,12 @@ int main(int ac, char *av[])
     int tab[] = {1, 27, 3, 6, 5, 6, 5, 8, 1, 10};
 
     for (int i = 0; i < 1000; i++) {
-        if (vec_push_int(vec, i) != VEC_OK) {
+        if (vec_push_int(vec, i) != BUF_OK) {
             perror("Error");
             return (84);
         }
     }
-    if (vec_reserve(vec, 2000) != VEC_OK) {
+    if (vec_reserve(vec, 2000) != BUF_OK) {
         perror("Error");
         return (84);
     }

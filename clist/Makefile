@@ -24,6 +24,22 @@ RESET		=	\033[0m
 BUILD_DIR = ../build/
 CC = gcc
 
+ifeq ($(DEBUG), n)
+	CFLAGS += -O2 -march=native -mtune=native -flto -fwhole-program
+	RULE = "DEBUG=n"
+	BUILD_PATH := $(BUILD_DIR)release/
+# used with make DEBUG=y
+else ifeq ($(DEBUG), y)
+	LDFLAGS += -fsanitize=address -fsanitize-address-use-after-scope
+	CFLAGS += -g3 -DDEBUG  -fsanitize=address
+	RULE = "DEBUG=y"
+	BUILD_PATH := $(BUILD_DIR)asan/
+else
+	CFLAGS += -g -fanalyzer -Wanalyzer-too-complex
+	LDFLAGS += -fwhole-program -flto
+	BUILD_PATH := $(BUILD_DIR)debug/
+endif
+
 SRC 	=	src/chained_list_concat.c		\
 			src/chained_list_create.c 	\
 			src/chained_list_data_destructor.c	\
@@ -50,45 +66,38 @@ CRIT_LIST	=	../tests/lib/clist/test_list_init.c \
 SRC_CRIT = $(SRC)
 TEST_CRIT = $(CRIT_LIST)
 
-OBJ = 	$(SRC:%.c=$(BUILD_DIR)$(NAME)/%.o)
-OBJ_CRIT = $(CRIT_LIST:%.c=$(BUILD_DIR)$(NAME)/%.o)
-OBJ_SRC_CRIT = $(SRC:%.c=$(BUILD_DIR)tests/$(NAME)/%.o)
+OBJ = 	$(SRC:%.c=$(BUILD_PATH)$(NAME)/%.o)
+OBJ_CRIT = $(CRIT_LIST:%.c=$(BUILD_PATH)$(NAME)/%.o)
+OBJ_SRC_CRIT = $(SRC:%.c=$(BUILD_PATH)tests/$(NAME)/%.o)
 DEPS = 	$(OBJ:%.o=%.d)
 
 
 CFLAGS = -W -Wall -Wextra -Iinclude
+CFLAGS += -MMD -MP
 CRITFLAGS = -lcriterion --coverage
-
-ifeq ($(DEBUG), n)
-	CFLAGS += -O2
-# used with make DEBUG=y
-else ifeq ($(DEBUG), y)
-	LDFLAGS = -fsanitize=address -fsanitize-address-use-after-scope
-	CFLAGS += -g3 -DDEBUG  -fsanitize=address
-else
-	CFLAGS += -g
-endif
 
 $(BUILD_DIR)tests/$(NAME)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -c -o $@
+	$(CC) $(CFLAGS) $< -c -o $@
 
-$(BUILD_DIR)$(NAME)/%.o: %.c
+$(BUILD_PATH)$(NAME)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -c -o $@
+	$(CC) $(CFLAGS) $< -c -o $@
 
-$(BUILD_DIR)$(LIBNAME): $(OBJ)
-	ar rc $(BUILD_DIR)$(LIBNAME) $(OBJ)
+$(BUILD_PATH)$(LIBNAME): $(OBJ)
+	ar rc $(BUILD_PATH)$(LIBNAME) $(OBJ)
 	@echo "$(GREEN)✓ Compiled $(LIBNAME)$(RESET)"
 
 all:	$(LIBNAME)
+
+-include $(DEPS)
 
 clean:
 	@rm -f $(OBJ) *~ *.gcno *.gcda $(OBJ_SRC_CRIT) $(OBJ_CRIT) #*#
 	@echo "[$(YELLOW)Cleaned $(LIBNAME)$(RESET)]"
 
 fclean: clean
-	@rm -f $(BUILD_DIR)$(LIBNAME)
+	@rm -f $(BUILD_PATH)$(LIBNAME)
 	@rm -f unit-tests
 	@echo "[$(YELLOW)Fcleaned $(LIBNAME)$(RESET)]"
 
@@ -101,5 +110,4 @@ tests_run: $(OBJ_CRIT)
 	@./unit-tests
 
 .PHONY: all clean fclean re
-
--include $(DEPS)
+.NOTPARALLEL: re
