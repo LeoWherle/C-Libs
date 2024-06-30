@@ -7,10 +7,13 @@
 
 #pragma once
 
-#include "vector.h"
-
-typedef struct buffer_s {
-    vector_t vector;
-    size_t pos;
-    size_t filled;
-} buffer_t;
+typedef enum buf_error_e {
+    BUF_OK = 0,
+    BUF_ALLOC,
+    BUF_INDEX,
+    BUF_EMPTY,
+    BUF_CAPACITY,
+    BUF_SIZE,
+    BUF_NULLPTR,
+    BUF_INVALID,
+} buf_error_t;

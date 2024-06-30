@@ -8,13 +8,13 @@
 #include "vector.h"
 #include <string.h>
 
-vec_error_t vec_push(vector_t *vec, const void *item)
+buf_error_t vec_push(vector_t *vec, const void *item)
 {
     if (vec == NULL || item == NULL) {
-        return (VEC_NULLPTR);
+        return (BUF_NULLPTR);
     }
-    if (vec_reserve(vec, 1) != VEC_OK) {
-        return (VEC_ALLOC);
+    if (vec_reserve(vec, 1) != BUF_OK) {
+        return (BUF_ALLOC);
     }
     if (vec->cpctor != NULL) {
         vec->cpctor(VEC_AT(vec, vec->nmemb), item);
@@ -22,20 +22,20 @@ vec_error_t vec_push(vector_t *vec, const void *item)
         memcpy(VEC_AT(vec, vec->nmemb), item, vec->item_size);
     }
     vec->nmemb++;
-    return (VEC_OK);
+    return (BUF_OK);
 }
 
-vec_error_t vec_pop(vector_t *vec)
+buf_error_t vec_pop(vector_t *vec)
 {
     if (vec == NULL) {
-        return (VEC_NULLPTR);
+        return (BUF_NULLPTR);
     }
     if (vec->nmemb == 0) {
-        return (VEC_EMPTY);
+        return (BUF_EMPTY);
     }
     if (vec->dtor != NULL) {
         vec->dtor(VEC_AT(vec, vec->nmemb - 1));
     }
     vec->nmemb--;
-    return (VEC_OK);
+    return (BUF_OK);
 }

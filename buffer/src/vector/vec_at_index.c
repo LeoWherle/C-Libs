@@ -10,14 +10,14 @@
 #include <string.h>
 #include <sys/types.h>
 
-vec_error_t vec_insert(vector_t *vec, const void *elem, size_t index)
+buf_error_t vec_insert(vector_t *vec, const void *elem, size_t index)
 {
     if (vec == NULL || elem == NULL)
-        return (VEC_NULLPTR);
+        return (BUF_NULLPTR);
     if (index > vec->nmemb)
-        return (VEC_INDEX);
-    if (vec_reserve(vec, 1) != VEC_OK)
-        return (VEC_ALLOC);
+        return (BUF_INDEX);
+    if (vec_reserve(vec, 1) != BUF_OK)
+        return (BUF_ALLOC);
     if (index < vec->nmemb) {
         memmove(VEC_AT(vec, index + 1), VEC_AT(vec, index),
             VEC_BYTES_LEFT(vec, index));
@@ -28,7 +28,7 @@ vec_error_t vec_insert(vector_t *vec, const void *elem, size_t index)
         memcpy(VEC_AT(vec, index), elem, vec->item_size);
     }
     vec->nmemb++;
-    return (VEC_OK);
+    return (BUF_OK);
 }
 
 static void vec_remove_element(vector_t *vec, size_t index, void *item)
@@ -47,13 +47,13 @@ static bool is_valid_index(const vector_t *vec, size_t index)
     return (vec != NULL && index < vec->nmemb);
 }
 
-vec_error_t vec_delete_at(vector_t *vec, size_t index)
+buf_error_t vec_delete_at(vector_t *vec, size_t index)
 {
     if (!is_valid_index(vec, index)) {
-        return (VEC_INDEX);
+        return (BUF_INDEX);
     }
     vec_remove_element(vec, index, VEC_AT(vec, index));
-    return (VEC_OK);
+    return (BUF_OK);
 }
 
 void *vec_remove(vector_t *vec, size_t index)

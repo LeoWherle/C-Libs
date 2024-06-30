@@ -65,7 +65,7 @@ vector_t *vec_filter(const vector_t *vec, const filter_fn_t fun)
     new_vec = vec_new(vec->item_size, vec->dtor, vec->cpctor);
     if (new_vec == NULL)
         return NULL;
-    if (vec_reserve(new_vec, vec->nmemb) != VEC_OK) {
+    if (vec_reserve(new_vec, vec->nmemb) != BUF_OK) {
         vec_delete(new_vec);
         return NULL;
     }

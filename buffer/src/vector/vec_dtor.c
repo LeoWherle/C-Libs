@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-void vec_delete(vector_t *vec)
+void vec_reset(vector_t *vec)
 {
     size_t i = 0;
 
-    if (vec == NULL) {
+    if (vec == NULL || !vec->items) {
         return;
     }
     if (vec->dtor != NULL) {
@@ -23,6 +23,14 @@ void vec_delete(vector_t *vec)
         }
     }
     free(vec->items);
+    vec->items = NULL;
+    vec->nmemb = 0;
+    vec->capacity = 0;
+}
+
+void vec_delete(vector_t *vec)
+{
+    vec_reset(vec);
     free(vec);
 }
 

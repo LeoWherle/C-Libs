@@ -9,21 +9,38 @@
 #include <string.h>
 #pragma GCC diagnostic ignored "-Wunused-result"
 
-vec_error_t vec_append(vector_t *dest, vector_t *src)
+buf_error_t vec_append(vector_t *dest, vector_t *src)
 {
     size_t i = 0;
 
     if (dest == NULL || src == NULL) {
-        return (VEC_NULLPTR);
+        return (BUF_NULLPTR);
     }
-    if (vec_reserve(dest, src->nmemb) != VEC_OK) {
-        return (VEC_ALLOC);
+    if (vec_reserve(dest, src->nmemb) != BUF_OK) {
+        return (BUF_ALLOC);
     }
     for (; i < src->nmemb; i++) {
-        (void) vec_push(dest, VEC_AT(src, i));
+        vec_push(dest, VEC_AT(src, i));
     }
     vec_clear(src);
-    return (VEC_OK);
+    return (BUF_OK);
+}
+
+buf_error_t vec_append_array(
+    vector_t *dest, const void *buf, size_t nmemb, size_t item_size)
+{
+    size_t i = 0;
+
+    if (dest == NULL || buf == NULL) {
+        return (BUF_NULLPTR);
+    }
+    if (vec_reserve(dest, nmemb + 1) != BUF_OK) {
+        return (BUF_ALLOC);
+    }
+    for (; i < nmemb; i++) {
+        (void) vec_push(dest, buf + i * item_size);
+    }
+    return (BUF_OK);
 }
 
 vector_t *vec_split_off(vector_t *vec, size_t index)

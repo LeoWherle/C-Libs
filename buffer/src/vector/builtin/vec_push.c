@@ -7,22 +7,22 @@
 
 #include "vector.h"
 
-vec_error_t vec_push_int(vector_t *vec, int elem)
+buf_error_t vec_push_int(vector_t *vec, int elem)
 {
     return (vec_push(vec, &elem));
 }
 
-vec_error_t vec_push_char(vector_t *vec, char elem)
+buf_error_t vec_push_char(vector_t *vec, char elem)
 {
     return (vec_push(vec, &elem));
 }
 
-vec_error_t vec_push_float(vector_t *vec, float elem)
+buf_error_t vec_push_float(vector_t *vec, float elem)
 {
     return (vec_push(vec, &elem));
 }
 
-vec_error_t vec_push_double(vector_t *vec, double elem)
+buf_error_t vec_push_double(vector_t *vec, double elem)
 {
     return (vec_push(vec, &elem));
 }
